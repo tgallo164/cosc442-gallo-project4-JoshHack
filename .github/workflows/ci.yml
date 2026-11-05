@@ -1,0 +1,33 @@
+name: JoshHack CI / Mutation Testing
+
+on: [push, pull_request]
+
+jobs:
+  build-and-mutate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Grant execute permission for Maven wrapper
+      run: chmod +x mvnw
+
+    - name: Run JUnit Tests
+      run: ./mvnw test
+
+    - name: Run PIT Mutation Tests
+      run: ./mvnw pitest:mutationCoverage
+
+    - name: Upload PIT Mutation Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: pit-reports
+        path: target/pit-reports/
